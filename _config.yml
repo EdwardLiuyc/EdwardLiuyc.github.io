@@ -3,7 +3,7 @@ title: Edward's Blog
 SEOTitle: 爱德华的博客 | Edward's Blog
 header-img: img/home-bg.jpg
 email: liuyongchuan@outlook.com
-description: "关于前端与设计、黑客与画家 | 黄玄，Web & Mobile Lover，Software Engineer，UX Designer | 这里是 @Hux黄玄 的个人博客，与你一起发现更大的世界。"
+description: "SLAM算法初学者"
 keyword: "Cartographer, SLAM, C/C++, Algorithm"
 url: "https://edwardliuyc.github.io"              # your host, for absolute URL
 baseurl: ""                             # for example, '/blog' if your blog hosted on 'host/blog'
@@ -73,7 +73,7 @@ netease_comment: false
 # Sidebar settings
 sidebar: true                           # whether or not using Sidebar.
 sidebar-about-description: "For the next quantum leap<br>离开世界之前，一切都是过程"
-sidebar-avatar: /img/avatar-hux-ny.jpg      # use absolute URL, seeing it's used in both `/` and `/about/`
+sidebar-avatar: /img/luluxiu.jpeg      # use absolute URL, seeing it's used in both `/` and `/about/`
 
 
 
