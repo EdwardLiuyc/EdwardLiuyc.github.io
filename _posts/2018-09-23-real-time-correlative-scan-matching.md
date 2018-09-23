@@ -11,7 +11,6 @@ tags:								#标签
     - Cartographer
     - scan matching
 ---
-<script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
 ## Real-time correlative scan matching 论文算法分析 ##
 
