@@ -47,15 +47,16 @@ $$ p(\, z_t \, | \, x_t, \, m_{t-1} )\tag{Observation} $$
 好了，经过上面的简化，我们的算法已经相对要简单多了，下面就是这个算法的核心：
 首先，在我们的直观感受里，$z_t$ （雷达观测数据）里包含了很多点数据（二维平面上的极坐标），而这些数据相互之间并没有关联，所以我们这里假设他们是完全独立的：
 
-$$ p(\, z_t \, | \, x_t, \, m_{t-1} ) \,= \,\prod_{i}p(\, z_t^i \, | \, x_t, \, m_{t-1}) \,\propto\,\sum_{i}\log{p(\, z_t^i \, | \, x_t, \, m_{t-1})} \tag{Factorization} $$
+$$ p(\, z_t \, | \, x_t, \, m_{t-1} ) \,= \,\prod_{i}p(\, z_t^i \, | \, x_t, \, m_{t-1}) \,\\\propto\,\sum_{i}\log{p(\, z_t^i \, | \, x_t, \, m_{t-1})} \tag{Factorization} $$
 
 上面的式子将整个一帧观测数据的概率拆分成了当前帧的数据的每一个点的概率，在计算这个概率之前，我们需要对数据帧以及地图做一些处理——栅格化。
 对 ROS 比较熟悉的读者会知道 ROS 里面有一种常用的 2d 地图表达形式，就是占据栅格图（occupancy grid map），就是利用了栅格化的思路，原理很简单，如下图是一帧scan数据的一小部分，我们将整个观测平面切分成固定宽度的方格，我们可以类比图片，每个方格都是一个像素，每个位置有障碍物的概率对应该像素的灰度值。概率越高值越则该像素越黑，说明该位置很有可能有障碍物；相反概率越低越白，也就意味着该位置很可能是空的；未知区域的灰度为128。
-<div align="center"><img src="https://pt.sjtu.edu.cn/picbucket/94431_153607598186.png" width="500" alt="grid_map"/></div>
+
+<div align="center"><img src="https://pt.sjtu.edu.cn/picbucket/94431_153607598186.png" width="600" alt="grid_map"/></div>
 
 到了最后一步，scan to map 的 scan matching 问题。如下图（我不知道用什么工具可以快速画出上面图中的效果，所以只好手绘拍下来，有更好办法的读者希望可以留言告知），我们假设已经有的地图为 $Figure.1$，图中小三角形是上一时刻的机器人的位姿。当前时刻我们获取到的雷达数据（scan）见 $Figure.2$，我们很容易就能判断出当前的机器人位置（较上一时刻前进了３个像素），不过我们需要用算法实现这个判断。
 
-<div align="center"><img src="https://pt.sjtu.edu.cn/picbucket/94431_153607480939.jpg" width="500" alt="scan_to_map" /></div>
+<div align="center"><img src="https://pt.sjtu.edu.cn/picbucket/94431_153607480939.jpg" width="600" alt="scan_to_map" /></div>
 
 - 现在设 $z_t$ 为 $( 1, 1 ) , ( 2, 0 ) , ( 1, 2 ) ..$  这样的一个坐标集合
 - 在 $x_{t-1}$ 的周围设定一个 search window，比如一个以$x_{t-1}$为中心的10×10 的矩形区域（单位为像素），这个search window也包括旋转的范围，如（-10°, 10°）
@@ -68,5 +69,4 @@ Cartographer 中的实现思路大概如上，详细可以看Cartographer代码�
 这个思路在保证不错过最佳匹配的同时明显减少了计算量，使得scan matching可以达到real time的效果。
 
 ### 后记
-
-　　Cartographer中有两个scan matcher都涉及到了这个论文里的类似算法，包括前面提高的real time correlative scan matcher, 而真正实现了上面的multi-resolution的思路的是fast correlative scan matcher，有兴趣的读者可以去阅读一下源码，代码量不大，也不难懂。
+Cartographer中有两个scan matcher都涉及到了这个论文里的类似算法，包括前面提高的real time correlative scan matcher, 而真正实现了上面的multi-resolution的思路的是fast correlative scan matcher，有兴趣的读者可以去阅读一下源码，代码量不大，也不难懂。

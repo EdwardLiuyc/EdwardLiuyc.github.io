@@ -55,11 +55,14 @@ kramdown:
   entity_output:             as_char
   toc_levels:                1..6
   smart_quotes:              lsquo,rsquo,ldquo,rdquo
-  enable_coderay:            false
-  hard_wrap:                 false
-  syntax_highlighter:        rouge
+  enable_coderay:            true
+  hard_wrap:                 true
+  syntax_highlighter:        coderay
   transliterated_header_ids: true
   footnote_backlink:         "&#8617;&#xfe0e;"
+  coderay_line_numbers:      nil
+  coderay_tab_width:         4
+  coderat_css:               coderay
 
 
 # Disqus settings
@@ -67,6 +70,7 @@ disqus_username: edward_liu
 
 # Netease settings
 netease_comment: false
+# theme: jekyll-theme-architect
 
 
 
