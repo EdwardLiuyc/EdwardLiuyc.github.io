@@ -5,8 +5,8 @@ header-img: img/home-bg.jpg
 email: liuyongchuan@outlook.com
 description: "SLAM算法初学者"
 keyword: "Cartographer, SLAM, C/C++, Algorithm"
-url: "https://edwardliuyc.github.io"              # your host, for absolute URL
-baseurl: ""                             # for example, '/blog' if your blog hosted on 'host/blog'
+url: "https://edwardliuyc.github.io" # your host, for absolute URL
+baseurl: "" # for example, '/blog' if your blog hosted on 'host/blog'
 
 # Publish posts or collection documents with a future date.
 future: true
@@ -15,7 +15,7 @@ future: true
 RSS: false
 # weibo_username:     huxpro
 # zhihu_username:     huxpro
-github_username:    EdwardLiuyc
+github_username: EdwardLiuyc
 # twitter_username:   huxpro
 #facebook_username:  huxpro
 #linkedin_username:  firstname-lastname-idxxxx
@@ -47,22 +47,21 @@ plugins: [jekyll-paginate]
 # although redcarpet can auto highlight code, the lack of header-id make the catalog impossible, so I switch to kramdown
 # document: http://jekyllrb.com/docs/configuration/#kramdown
 markdown: kramdown
-highlighter:    rouge
 kramdown:
-  input:                     GFM
-  auto_ids:                  true
-  footnote_nr:               1
-  entity_output:             as_char
-  toc_levels:                1..6
-  smart_quotes:              lsquo,rsquo,ldquo,rdquo
-  enable_coderay:            true
-  hard_wrap:                 true
-  syntax_highlighter:        coderay
-  transliterated_header_ids: true
-  footnote_backlink:         "&#8617;&#xfe0e;"
-  coderay_line_numbers:      nil
-  coderay_tab_width:         4
-  coderat_css:               coderay
+  input: GFM
+#   auto_ids: true
+#   footnote_nr: 1
+#   entity_output: as_char
+#   toc_levels: 1..6
+#   smart_quotes: lsquo,rsquo,ldquo,rdquo
+#   enable_coderay: false
+  hard_wrap: true
+#   syntax_highlighter: rouge
+#   transliterated_header_ids: true
+#   footnote_backlink: "&#8617;&#xfe0e;"
+#   coderay_line_numbers: nil
+#   coderay_tab_width: 4
+#   coderat_css: coderay
 
 
 # Disqus settings
