@@ -54,7 +54,7 @@ void CeresScanMatcher::Match(const transform::Rigid2d& previous_pose,
                              const sensor::PointCloud& point_cloud,
                              const ProbabilityGrid& probability_grid,
                              transform::Rigid2d* const pose_estimate,
-                             ceres::Solver::Summary* const summary) const 
+                             ceres::Solver::Summary* const summary) const
 {
     // 优化的变量（3个）
     double ceres_pose_estimate[3] = {initial_pose_estimate.translation().x(),
@@ -68,11 +68,12 @@ void CeresScanMatcher::Match(const transform::Rigid2d& previous_pose,
     problem.AddResidualBlock(
       new ceres::AutoDiffCostFunction<OccupiedSpaceCostFunctor, ceres::DYNAMIC, 3>(
         new OccupiedSpaceCostFunctor(
-          options_.occupied_space_weight() / std::sqrt(static_cast<double>(point_cloud.size())),
-            point_cloud, probability_grid),
-          point_cloud.size()),
-        nullptr, 
-        ceres_pose_estimate);
+          options_.occupied_space_weight() / 
+            std::sqrt(static_cast<double>(point_cloud.size())),
+          point_cloud, probability_grid),
+        point_cloud.size()),
+      nullptr, 
+      ceres_pose_estimate);
     CHECK_GT(options_.translation_weight(), 0.);
 	
     problem.AddResidualBlock(
@@ -89,7 +90,8 @@ void CeresScanMatcher::Match(const transform::Rigid2d& previous_pose,
       ceres_pose_estimate);
 
     ceres::Solve(ceres_solver_options_, &problem, summary);
-    *pose_estimate = transform::Rigid2d({ceres_pose_estimate[0], ceres_pose_estimate[1]}, ceres_pose_estimate[2]);
+    *pose_estimate = transform::Rigid2d({ceres_pose_estimate[0], 
+      ceres_pose_estimate[1]}, ceres_pose_estimate[2]);
 }
 ```
 #### Translation & Rotational Cost Function
@@ -112,7 +114,7 @@ class TranslationDeltaCostFunctor {
 
   template <typename T>
   bool operator()(const T* const pose, T* residual) const {
-	// 获得一个 2 维的残差，即 x,y 方向上的位移
+    // 获得一个 2 维的残差，即 x,y 方向上的位移
     residual[0] = scaling_factor_ * (pose[0] - x_);
     residual[1] = scaling_factor_ * (pose[1] - y_);
     return true;
@@ -203,5 +205,5 @@ class OccupiedSpaceCostFunctor {
 其实不难发现，这个Occupied Space Cost Function 的模型和上一篇博客中的 Real time correlative scan matching 的思路基本上一致，只是求解方法变成了最小二乘问题的求解，这样求解过程我们无需关心，只需要关心建模本身。
 
 ### 参考资料
-[1] [Ceres Solver tutorial](http://ceres-solver.org/index.html)
+[1] [Ceres Solver tutorial](http://ceres-solver.org/index.html)  
 [2] [Real-Time Loop Closure in 2D LIDAR SLAM](https://static.googleusercontent.com/media/research.google.com/zh-CN//pubs/archive/45466.pdf)
