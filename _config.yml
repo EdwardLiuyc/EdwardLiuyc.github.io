@@ -55,12 +55,12 @@ kramdown:
 #   toc_levels: 1..6
 #   smart_quotes: lsquo,rsquo,ldquo,rdquo
 #   enable_coderay: false
-#   hard_wrap: true
+  hard_wrap: true
 #   syntax_highlighter: rouge
 #   transliterated_header_ids: true
 #   footnote_backlink: "&#8617;&#xfe0e;"
 #   coderay_line_numbers: nil
-#   coderay_tab_width: 4
+  coderay_tab_width: 4
 #   coderat_css: coderay
 
 
