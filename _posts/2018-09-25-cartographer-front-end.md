@@ -13,21 +13,21 @@ tags:								#标签
 
 ## Cartographer 的前端算法思路
 
-前一篇博客里面提到的是 Cartographer 前端实现中非常小的一个部分的算法思路，参照了《Real time correlative scan matching》里的算法实现了一部分实时scan match 的功能，不过这并不是Cartographer中前端的全部，甚至是可以通过参数disable的一部分功能。
+前一篇博客里面提到的是 Cartographer 前端实现中非常小的一个部分的算法思路，参照了《Real time correlative scan matching》里的算法实现了一部分实时scan match 的功能，不过这并不是Cartographer中前端的全部，甚至是可以通过参数disable的一部分功能。   
 在 Cartographer 对应的论文《Real-Time Loop Closure in 2D LIDAR SLAM》中提到的前端算法中只有Ceres scan matching，其实就是基于ceres solver实现的非线性优化模型，今天我们看一下具体的算法模型。同样，在读懂算法和代码之前需要一些基础知识：
 
-> [Ceres Solver tutorial](http://ceres-solver.org/index.html) & 最小二乘求解非线性优化问题
-> [Cartographer Git](https://github.com/googlecartographer/cartographer)
-> [双三次插值](https://www.wikiwand.com/zh-hans/%E5%8F%8C%E4%B8%89%E6%AC%A1%E6%8F%92%E5%80%BC)
+> [Ceres Solver tutorial](http://ceres-solver.org/index.html) & 最小二乘求解非线性优化问题  
+> [Cartographer Git](https://github.com/googlecartographer/cartographer)  
+> [双三次插值](https://www.wikiwand.com/zh-hans/%E5%8F%8C%E4%B8%89%E6%AC%A1%E6%8F%92%E5%80%BC)  
 
 ### 论文内容简单翻译
 这里我们主要看论文的"IV. Local 2D SLAM" —— "C. ceres scan matching"部分：
-> Prior to inserting a scan into a submap, the scan pose ξ is optimized relative to the current local submap using a Ceres-based [14] scan matcher. The scan matcher is responsible for finding a scan pose that maximizes the probabilities at the scan points in the submap. We cast this as a nonlinear least squares problem
-> ***我们用一个基于 ceres solver 的 scan matcher 优化获得当前的 scan pose $\xi$，这个 scan matcher 负责找到一个位姿使得 scan 中的所有点在当前 local map 中的概率和最大，于是我们定义一下最小二乘问题：***
-> $$ \underset{\xi}{\arg\min}\sum_{k=1}^K(1-M_{smooth}(T_{\xi}h_k))^2 \tag{CS} $$
-> where $T_{\xi}$ transforms $h_k$ from the scan frame to the submap frame according to the scan pose. The function $ M_{smooth} : \mathbb{R}^2 → \mathbb{R} $ is a smooth version of the probability values in the local submap. We use **bicubic interpolation**. As a result, values outside the interval [0, 1] can occur but are considered harmless.
-> ***式中 $T_{\xi}$ 将 $h_k$ 中的 scan 点全部转化到 local map 坐标系下，$ M_{smooth} : \mathbb{R}^2 → \mathbb{R} $  则是一个将 local map 中的各点概率进行一个平滑处理的函数，这里我们用双三次插值。这样可能会出现概率小于0或者大于1的情况，不过这种情况并不会产生错误。***
-> Mathematical optimization of this smooth function usually gives better precision than the resolution of the grid. Since this is a local optimization, good initial estimates are required. An IMU capable of measuring angular velocities can be used to estimate the rotational component $\theta$ of the pose between scan matches. A higher frequency of scan matches or a pixel-accurate scan matching approach, although more computationally intensive, can be used in the absence of an IMU.
+> Prior to inserting a scan into a submap, the scan pose ξ is optimized relative to the current local submap using a Ceres-based [14] scan matcher. The scan matcher is responsible for finding a scan pose that maximizes the probabilities at the scan points in the submap. We cast this as a nonlinear least squares problem  
+> **我们用一个基于 ceres solver 的 scan matcher 优化获得当前的 scan pose $\xi$，这个 scan matcher 负责找到一个位姿使得 scan 中的所有点在当前 local map 中的概率和最大，于是我们定义一下最小二乘问题：**  
+> $$ \underset{\xi}{\arg\min}\sum_{k=1}^K(1-M_{smooth}(T_{\xi}h_k))^2 \tag{CS} $$  
+> where $T_{\xi}$ transforms $h_k$ from the scan frame to the submap frame according to the scan pose. The function $ M_{smooth} : \mathbb{R}^2 → \mathbb{R} $ is a smooth version of the probability values in the local submap. We use **bicubic interpolation**. As a result, values outside the interval [0, 1] can occur but are considered harmless.  
+> ***式中 $T_{\xi}$ 将 $h_k$ 中的 scan 点全部转化到 local map 坐标系下，$ M_{smooth} : \mathbb{R}^2 → \mathbb{R} $  则是一个将 local map 中的各点概率进行一个平滑处理的函数，这里我们用双三次插值。这样可能会出现概率小于0或者大于1的情况，不过这种情况并不会产生错误。***  
+> Mathematical optimization of this smooth function usually gives better precision than the resolution of the grid. Since this is a local optimization, good initial estimates are required. An IMU capable of measuring angular velocities can be used to estimate the rotational component $\theta$ of the pose between scan matches. A higher frequency of scan matches or a pixel-accurate scan matching approach, although more computationally intensive, can be used in the absence of an IMU.  
 > ***数学优化问题通常会提供一个比网格地图的分辨率精度更高的优化结果。由于这是一个实时的局部优化，需要一个好的初始位姿估计。我们可以用 IMU 来估计 scan match 中的旋转角度 $\theta$，当然如果 scan matching 的频率很高，是可以不使用IMU的。***
 
 ### 算法与代码分析
@@ -41,14 +41,14 @@ Cartographer 的 ceres scan matcher 将上面的最小二成问题分解成了�
 ```cpp
 /*
  input:
- 1.上一个 scan 的位姿 previous_pose
- 2.当前的 scan 的位姿的初始估计 initial_pose_estimate
- 3.当前 scan 点云（2D）point_cloud
- 4.local map 概率分布栅格图 probability_grid
- output
- 1. 计算得到的位姿估计 pose_estimate
- 2. ceres solver 计算的总结 summary
-*/
+ 1.上一个 scan 的位姿 previous_pose  
+ 2.当前的 scan 的位姿的初始估计 initial_pose_estimate  
+ 3.当前 scan 点云（2D）point_cloud  
+ 4.local map 概率分布栅格图 probability_grid  
+ output  
+ 1. 计算得到的位姿估计 pose_estimate  
+ 2. ceres solver 计算的总结 summary  
+*/  
 void CeresScanMatcher::Match(const transform::Rigid2d& previous_pose,
                              const transform::Rigid2d& initial_pose_estimate,
                              const sensor::PointCloud& point_cloud,
@@ -63,8 +63,8 @@ void CeresScanMatcher::Match(const transform::Rigid2d& previous_pose,
     ceres::Problem problem;
     CHECK_GT(options_.occupied_space_weight(), 0.);
 	
-    // 下面分别加入了三个 Cost Function
-    // 这里的 ceres 相关的只是需要读者自行阅读 ceres solver的教程，教程写的很详细也很好理解
+    // 下面分别加入了三个 Cost Function  
+    // 这里的 ceres 相关的只是需要读者自行阅读 ceres solver的教程，教程写的很详细也很好理解  
     problem.AddResidualBlock(
       new ceres::AutoDiffCostFunction<OccupiedSpaceCostFunctor, ceres::DYNAMIC, 3>(
         new OccupiedSpaceCostFunctor(
